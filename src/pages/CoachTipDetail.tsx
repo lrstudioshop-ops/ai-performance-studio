@@ -36,37 +36,37 @@ const categoryImages = {
 };
 
 const detailedContent: Record<string, { steps: string[]; benefits: string[]; duration: string }> = {
-  '1': {
+  't1': {
     steps: [
-      'Calcula tu gasto calórico basal usando la fórmula de Harris-Benedict',
-      'Añade un 10-20% extra para el efecto térmico de los alimentos',
-      'Suma las calorías de tu actividad física diaria',
-      'Ajusta según tu objetivo: déficit para perder grasa, superávit para ganar músculo',
+      'Bebe un vaso de agua al despertar para activar tu metabolismo',
+      'Lleva siempre una botella de agua durante el entrenamiento',
+      'Hidrátate cada 15-20 minutos durante el ejercicio',
+      'Aumenta la ingesta en días de entrenamiento intenso',
     ],
-    benefits: ['Control del peso corporal', 'Mejor rendimiento deportivo', 'Composición corporal óptima'],
-    duration: '5-10 min diarios',
+    benefits: ['Mejor rendimiento físico', 'Prevención de calambres', 'Recuperación más rápida'],
+    duration: 'Todo el día',
   },
-  '2': {
+  't2': {
     steps: [
-      'Realiza 5-10 minutos de cardio ligero para aumentar la temperatura corporal',
-      'Incluye movilidad articular de todas las articulaciones principales',
-      'Añade estiramientos dinámicos específicos para los músculos que trabajarás',
-      'Realiza series de aproximación con peso ligero antes de las series de trabajo',
+      'Identifica los grupos musculares trabajados en cada sesión',
+      'Programa al menos 48 horas entre entrenamientos del mismo grupo',
+      'Incluye días de descanso activo con estiramientos suaves',
+      'Escucha a tu cuerpo y ajusta si hay fatiga excesiva',
     ],
-    benefits: ['Prevención de lesiones', 'Mayor rango de movimiento', 'Mejor activación muscular'],
-    duration: '10-15 min',
+    benefits: ['Recuperación muscular óptima', 'Prevención de lesiones', 'Mayor ganancia de fuerza'],
+    duration: '48-72 horas',
   },
-  '3': {
+  't3': {
     steps: [
-      'Duerme 7-9 horas por noche para optimizar la recuperación hormonal',
-      'Mantén un horario de sueño consistente, incluso los fines de semana',
-      'Evita pantallas y estimulantes 2 horas antes de dormir',
-      'Crea un ambiente oscuro, fresco y silencioso para dormir',
+      'Registra tus pesos y repeticiones actuales',
+      'Aumenta el peso un 5-10% cuando completes todas las repeticiones con buena técnica',
+      'Prioriza la técnica sobre el peso',
+      'Planifica mesociclos de 4-6 semanas con progresión gradual',
     ],
-    benefits: ['Recuperación muscular acelerada', 'Mejor síntesis proteica', 'Regulación hormonal óptima'],
-    duration: '7-9 horas',
+    benefits: ['Progreso constante', 'Prevención de lesiones', 'Adaptación muscular sostenida'],
+    duration: 'Semanal',
   },
-  '4': {
+  't4': {
     steps: [
       'Define objetivos SMART: Específicos, Medibles, Alcanzables, Relevantes y con Tiempo',
       'Divide tus metas grandes en pequeños hitos semanales',
@@ -75,6 +75,16 @@ const detailedContent: Record<string, { steps: string[]; benefits: string[]; dur
     ],
     benefits: ['Mayor adherencia al programa', 'Sensación de logro constante', 'Progreso medible y visible'],
     duration: '15 min semanales',
+  },
+  't5': {
+    steps: [
+      'Consume 20-40g de proteína dentro de los 30-60 minutos post-entreno',
+      'Combina proteína con carbohidratos para mejor absorción',
+      'Considera suplementos si no alcanzas tus necesidades con alimentación',
+      'Mantén una ingesta de 1.6-2.2g de proteína por kg de peso corporal',
+    ],
+    benefits: ['Síntesis muscular optimizada', 'Recuperación acelerada', 'Mejor composición corporal'],
+    duration: '30-60 min post-entreno',
   },
 };
 
