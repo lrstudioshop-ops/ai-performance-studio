@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        display: ['Orbitron', 'sans-serif'],
+        display: ['Bebas Neue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,12 +61,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        neon: {
-          cyan: "hsl(var(--neon-cyan))",
-          lime: "hsl(var(--neon-lime))",
-          purple: "hsl(var(--neon-purple))",
-          orange: "hsl(var(--neon-orange))",
-          pink: "hsl(var(--neon-pink))",
+        larios: {
+          orange: "hsl(var(--larios-orange))",
+          "orange-light": "hsl(var(--larios-orange-light))",
+          "orange-dark": "hsl(var(--larios-orange-dark))",
+          black: "hsl(var(--larios-black))",
+          gray: "hsl(var(--larios-gray))",
+          white: "hsl(var(--larios-white))",
         },
       },
       borderRadius: {
@@ -136,7 +137,6 @@ export default {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-mesh': 'radial-gradient(at 40% 20%, hsl(var(--primary) / 0.15) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(var(--neon-purple) / 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, hsl(var(--accent) / 0.1) 0px, transparent 50%)',
       },
     },
   },

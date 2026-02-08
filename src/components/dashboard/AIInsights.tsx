@@ -1,98 +1,103 @@
 import { motion } from 'framer-motion';
-import { aiRecommendations } from '@/lib/mock-data';
-import { Brain, TrendingUp, Moon, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Sparkles, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const iconMap = {
-  training: TrendingUp,
-  recovery: Moon,
-  nutrition: Brain,
-  warning: AlertTriangle,
-};
+interface AIRecommendation {
+  id: string;
+  type: 'training' | 'recovery' | 'warning';
+  priority: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+}
 
-const colorMap = {
-  training: 'text-primary bg-primary/10 border-primary/30',
-  recovery: 'text-accent bg-accent/10 border-accent/30',
-  nutrition: 'text-neon-purple bg-neon-purple/10 border-neon-purple/30',
-  warning: 'text-neon-orange bg-neon-orange/10 border-neon-orange/30',
-};
+const aiRecommendations: AIRecommendation[] = [
+  {
+    id: 'ai1',
+    type: 'training',
+    priority: 'high',
+    title: 'Aumentar volumen de piernas',
+    description: 'Basado en tu progreso, puedes aumentar el volumen de entrenamiento de tren inferior en un 10% esta semana.',
+  },
+  {
+    id: 'ai2',
+    type: 'recovery',
+    priority: 'medium',
+    title: 'Sesión de movilidad recomendada',
+    description: 'Detectamos rigidez en caderas. Se recomienda una sesión de 20 min de movilidad hoy.',
+  },
+  {
+    id: 'ai3',
+    type: 'warning',
+    priority: 'low',
+    title: 'Riesgo de sobreentrenamiento',
+    description: 'Tu nivel de fatiga ha aumentado un 15% esta semana. Considera reducir la intensidad mañana.',
+  },
+];
 
 const AIInsights = () => {
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'training':
+        return TrendingUp;
+      case 'recovery':
+        return CheckCircle;
+      case 'warning':
+        return AlertTriangle;
+      default:
+        return Sparkles;
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.7 }}
+      transition={{ delay: 0.5 }}
       className="glass rounded-xl p-6"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
-          <Brain className="h-5 w-5 text-primary-foreground" />
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-accent">
+          <Sparkles className="h-4 w-4 text-primary-foreground" />
         </div>
-        <div>
-          <h3 className="font-display font-semibold text-lg">Insights de IA</h3>
-          <p className="text-sm text-muted-foreground">Recomendaciones personalizadas</p>
-        </div>
+        <h3 className="font-display text-lg tracking-wide">RECOMENDACIONES</h3>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {aiRecommendations.map((rec, index) => {
-          const Icon = iconMap[rec.type];
+          const Icon = getIcon(rec.type);
 
           return (
             <motion.div
               key={rec.id}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 + index * 0.1 }}
+              transition={{ delay: 0.55 + index * 0.05 }}
               className={cn(
-                'p-4 rounded-lg border transition-all duration-300 hover:scale-[1.02]',
-                colorMap[rec.type]
+                'p-3 rounded-lg border cursor-pointer transition-all duration-300 hover:scale-[1.02]',
+                rec.type === 'training' && 'bg-primary/5 border-primary/30',
+                rec.type === 'recovery' && 'bg-accent/5 border-accent/30',
+                rec.type === 'warning' && 'bg-destructive/5 border-destructive/30'
               )}
             >
               <div className="flex items-start gap-3">
-                <Icon className="h-5 w-5 mt-0.5" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-foreground">{rec.title}</h4>
-                    <span
-                      className={cn(
-                        'px-2 py-0.5 rounded-full text-xs font-medium',
-                        rec.priority === 'high' && 'bg-destructive/20 text-destructive',
-                        rec.priority === 'medium' && 'bg-accent/20 text-accent',
-                        rec.priority === 'low' && 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {rec.priority === 'high'
-                        ? 'Prioritario'
-                        : rec.priority === 'medium'
-                        ? 'Sugerido'
-                        : 'Info'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{rec.description}</p>
-                  {rec.action && (
-                    <motion.button
-                      whileHover={{ x: 4 }}
-                      className="flex items-center gap-1 mt-3 text-sm font-medium text-primary hover:underline"
-                    >
-                      {rec.action}
-                      <ArrowRight className="h-4 w-4" />
-                    </motion.button>
+                <Icon
+                  className={cn(
+                    'h-4 w-4 mt-0.5 flex-shrink-0',
+                    rec.type === 'training' && 'text-primary',
+                    rec.type === 'recovery' && 'text-accent',
+                    rec.type === 'warning' && 'text-destructive'
                   )}
+                />
+                <div>
+                  <p className="text-sm font-medium">{rec.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {rec.description}
+                  </p>
                 </div>
               </div>
             </motion.div>
           );
         })}
-      </div>
-
-      <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-primary/10 via-accent/10 to-neon-purple/10 border border-primary/20">
-        <p className="text-sm text-center">
-          <span className="text-muted-foreground">Motor de IA analizando </span>
-          <span className="font-medium text-primary">147 métricas</span>
-          <span className="text-muted-foreground"> de tu rendimiento</span>
-        </p>
       </div>
     </motion.div>
   );

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
-import { trainingSchedule, exercises } from '@/lib/mock-data';
+import { trainingSchedule } from '@/lib/mock-data';
 import { ChevronLeft, ChevronRight, Plus, Dumbbell, Clock, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -60,8 +60,8 @@ const Calendar = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-display text-3xl font-bold">
-          <span className="gradient-text">Calendario</span>
+        <h1 className="font-display text-4xl tracking-wide">
+          <span className="gradient-text">CALENDARIO</span>
         </h1>
         <p className="text-muted-foreground mt-2">
           Visualiza y planifica tus sesiones de entrenamiento
@@ -78,8 +78,8 @@ const Calendar = () => {
         >
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display font-semibold text-xl">
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+            <h2 className="font-display text-2xl tracking-wide">
+              {monthNames[currentDate.getMonth()].toUpperCase()} {currentDate.getFullYear()}
             </h2>
             <div className="flex items-center gap-2">
               <motion.button
@@ -155,7 +155,7 @@ const Calendar = () => {
                       </span>
                       {hasTraining && (
                         <div className="mt-auto space-y-1">
-                          {sessions.slice(0, 2).map((session, i) => (
+                          {sessions.slice(0, 2).map((session) => (
                             <div
                               key={session.id}
                               className={cn(
@@ -191,7 +191,7 @@ const Calendar = () => {
           className="glass rounded-xl p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display font-semibold text-lg">Próximas Sesiones</h2>
+            <h2 className="font-display text-xl tracking-wide">PRÓXIMAS SESIONES</h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -257,9 +257,9 @@ const Calendar = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium"
+            className="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold"
           >
-            Crear Nueva Sesión
+            Generar Nueva Sesión
           </motion.button>
         </motion.div>
       </div>
@@ -271,18 +271,18 @@ const Calendar = () => {
         transition={{ delay: 0.3 }}
         className="mt-6 glass rounded-xl p-6"
       >
-        <h2 className="font-display font-semibold text-lg mb-4">Resumen del Mes</h2>
+        <h2 className="font-display text-xl tracking-wide mb-4">RESUMEN DEL MES</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { label: 'Sesiones Completadas', value: '18', total: '24' },
             { label: 'Tiempo Total', value: '22h', total: '30h' },
             { label: 'Calorías Quemadas', value: '8,400', unit: 'kcal' },
             { label: 'Días de Descanso', value: '6', total: '8' },
-          ].map((stat, index) => (
+          ].map((stat) => (
             <div key={stat.label} className="text-center">
               <p className="text-sm text-muted-foreground mb-2">{stat.label}</p>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="font-display font-bold text-2xl">{stat.value}</span>
+                <span className="font-display text-2xl">{stat.value}</span>
                 {stat.total && (
                   <span className="text-sm text-muted-foreground">/ {stat.total}</span>
                 )}

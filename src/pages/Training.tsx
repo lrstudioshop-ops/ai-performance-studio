@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
-import { trainingSchedule, exercises, trainingTypes } from '@/lib/mock-data';
+import { trainingSchedule, exercises, trainingTypes, exercisesBySport } from '@/lib/mock-data';
+import { useUser } from '@/contexts/UserContext';
 import {
   Play,
   Pause,
@@ -17,11 +18,16 @@ import {
 import { cn } from '@/lib/utils';
 
 const Training = () => {
+  const { user } = useUser();
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [currentExercise, setCurrentExercise] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
   const selectedSession = trainingSchedule.find((s) => s.id === activeSession);
+  
+  // Get exercises based on user's sport
+  const userSportExercises = user?.sport ? exercisesBySport[user.sport] || [] : [];
+  const allExercises = [...userSportExercises, ...exercises];
 
   return (
     <MainLayout>
@@ -31,8 +37,8 @@ const Training = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-display text-3xl font-bold">
-          <span className="gradient-text">Entrenamiento</span>
+        <h1 className="font-display text-4xl tracking-wide">
+          <span className="gradient-text">ENTRENAMIENTO</span>
         </h1>
         <p className="text-muted-foreground mt-2">
           Gestiona tus sesiones y sigue tu progreso en tiempo real
@@ -46,7 +52,7 @@ const Training = () => {
         transition={{ delay: 0.1 }}
         className="mb-8"
       >
-        <h2 className="font-display font-semibold text-lg mb-4">Tipos de Entrenamiento</h2>
+        <h2 className="font-display text-xl tracking-wide mb-4">TIPOS DE ENTRENAMIENTO</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {trainingTypes.map((type, index) => (
             <motion.button
@@ -59,15 +65,9 @@ const Training = () => {
               className="p-4 rounded-xl glass border border-border hover:border-primary/50 transition-all duration-300 text-center group"
             >
               <div
-                className="w-12 h-12 rounded-lg mx-auto mb-3 flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                style={{ backgroundColor: `${type.color}20` }}
+                className="w-12 h-12 rounded-lg mx-auto mb-3 flex items-center justify-center transition-all duration-300 group-hover:scale-110 bg-primary/20"
               >
-                {type.id === 'strength' && <Dumbbell className="h-6 w-6" style={{ color: type.color }} />}
-                {type.id === 'endurance' && <Target className="h-6 w-6" style={{ color: type.color }} />}
-                {type.id === 'speed' && <Zap className="h-6 w-6" style={{ color: type.color }} />}
-                {type.id === 'power' && <Flame className="h-6 w-6" style={{ color: type.color }} />}
-                {type.id === 'mobility' && <Target className="h-6 w-6" style={{ color: type.color }} />}
-                {type.id === 'recovery' && <Clock className="h-6 w-6" style={{ color: type.color }} />}
+                <Dumbbell className="h-6 w-6 text-primary" />
               </div>
               <span className="text-sm font-medium">{type.name}</span>
             </motion.button>
@@ -84,7 +84,7 @@ const Training = () => {
             transition={{ delay: 0.2 }}
             className="glass rounded-xl p-6"
           >
-            <h2 className="font-display font-semibold text-lg mb-4">Sesiones Programadas</h2>
+            <h2 className="font-display text-xl tracking-wide mb-4">SESIONES PROGRAMADAS</h2>
             <div className="space-y-3">
               {trainingSchedule.map((session, index) => (
                 <motion.button
@@ -143,7 +143,7 @@ const Training = () => {
                 {/* Session Header */}
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="font-display font-semibold text-xl">{selectedSession.name}</h2>
+                    <h2 className="font-display text-2xl tracking-wide">{selectedSession.name.toUpperCase()}</h2>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
@@ -166,8 +166,8 @@ const Training = () => {
                     className={cn(
                       'p-4 rounded-xl transition-all duration-300',
                       isRunning
-                        ? 'bg-accent text-accent-foreground neon-glow-accent'
-                        : 'bg-primary text-primary-foreground neon-glow'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-gradient-to-r from-primary to-accent text-primary-foreground orange-glow'
                     )}
                   >
                     {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
@@ -177,7 +177,7 @@ const Training = () => {
                 {/* Exercise List */}
                 <div className="space-y-4">
                   {selectedSession.exercises.map((ex, index) => {
-                    const exercise = exercises.find((e) => e.id === ex.exerciseId);
+                    const exercise = allExercises.find((e) => e.id === ex.exerciseId);
                     if (!exercise) return null;
 
                     const isActive = currentExercise === index && isRunning;
@@ -241,7 +241,7 @@ const Training = () => {
                   </button>
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">Ejercicio</p>
-                    <p className="font-display font-bold text-lg">
+                    <p className="font-display text-lg">
                       {currentExercise + 1} / {selectedSession.exercises.length}
                     </p>
                   </div>
@@ -266,9 +266,7 @@ const Training = () => {
                 className="glass rounded-xl p-12 text-center"
               >
                 <Dumbbell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-display font-semibold text-lg mb-2">
-                  Selecciona una sesión
-                </h3>
+                <h3 className="font-display text-xl mb-2">SELECCIONA UNA SESIÓN</h3>
                 <p className="text-muted-foreground">
                   Elige una sesión de la lista para ver los detalles y comenzar tu entrenamiento
                 </p>

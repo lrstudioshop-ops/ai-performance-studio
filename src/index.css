@@ -2,78 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Studio Performance Design System - Futuristic Dark Theme */
+/* Larios Fitness App - Orange & Black Premium Theme */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bebas+Neue&display=swap');
 
 @layer base {
   :root {
-    /* Core backgrounds - Deep dark with subtle blue undertones */
-    --background: 222 47% 5%;
-    --foreground: 210 40% 98%;
+    /* Core backgrounds - Deep black with subtle warm undertones */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
 
-    /* Card surfaces - Elevated dark with glass effect */
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 98%;
+    /* Card surfaces - Elevated dark */
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
     /* Popover surfaces */
-    --popover: 222 47% 7%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary - Neon Cyan */
-    --primary: 186 100% 50%;
-    --primary-foreground: 222 47% 5%;
+    /* Primary - Vibrant Orange */
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 2%;
 
-    /* Secondary - Deep navy surface */
-    --secondary: 222 47% 12%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary - Dark gray surface */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
 
     /* Muted surfaces */
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
 
-    /* Accent - Lime green for success states */
-    --accent: 82 85% 45%;
-    --accent-foreground: 222 47% 5%;
+    /* Accent - Light Orange for success states */
+    --accent: 35 100% 55%;
+    --accent-foreground: 0 0% 2%;
 
     /* Destructive - Bright red for alerts */
     --destructive: 0 85% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
     /* Borders and inputs */
-    --border: 222 30% 18%;
-    --input: 222 30% 15%;
-    --ring: 186 100% 50%;
+    --border: 0 0% 18%;
+    --input: 0 0% 15%;
+    --ring: 25 95% 53%;
 
     --radius: 0.75rem;
 
     /* Custom colors for the app */
-    --neon-cyan: 186 100% 50%;
-    --neon-lime: 82 85% 45%;
-    --neon-purple: 270 100% 65%;
-    --neon-orange: 25 100% 55%;
-    --neon-pink: 330 100% 60%;
+    --larios-orange: 25 95% 53%;
+    --larios-orange-light: 35 100% 60%;
+    --larios-orange-dark: 20 90% 45%;
+    --larios-black: 0 0% 4%;
+    --larios-gray: 0 0% 25%;
+    --larios-white: 0 0% 98%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(186 100% 50%), hsl(220 100% 60%));
-    --gradient-accent: linear-gradient(135deg, hsl(82 85% 45%), hsl(120 80% 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(186 100% 50%) 0%, hsl(270 100% 65%) 50%, hsl(330 100% 60%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 3%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(25 95% 53%), hsl(35 100% 60%));
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 8%) 0%, hsl(0 0% 2%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(35 100% 60%) 100%);
     
     /* Shadows */
-    --shadow-neon: 0 0 20px hsl(186 100% 50% / 0.3);
-    --shadow-neon-lg: 0 0 40px hsl(186 100% 50% / 0.4);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
+    --shadow-orange: 0 0 20px hsl(25 95% 53% / 0.3);
+    --shadow-orange-lg: 0 0 40px hsl(25 95% 53% / 0.4);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.5);
 
     /* Sidebar */
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 210 40% 85%;
-    --sidebar-primary: 186 100% 50%;
-    --sidebar-primary-foreground: 222 47% 5%;
-    --sidebar-accent: 222 47% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 30% 15%;
-    --sidebar-ring: 186 100% 50%;
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 2%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 25 95% 53%;
   }
 }
 
@@ -88,36 +88,36 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
   }
 }
 
 @layer components {
   /* Glass morphism effect */
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-white/10;
+    @apply bg-card/80 backdrop-blur-xl border border-white/5;
   }
 
   .glass-hover {
-    @apply transition-all duration-300 hover:bg-card/80 hover:border-primary/30;
+    @apply transition-all duration-300 hover:bg-card/90 hover:border-primary/30;
   }
 
-  /* Neon glow effects */
-  .neon-glow {
+  /* Orange glow effects */
+  .orange-glow {
     box-shadow: 0 0 20px hsl(var(--primary) / 0.4),
                 0 0 40px hsl(var(--primary) / 0.2),
                 0 0 60px hsl(var(--primary) / 0.1);
   }
 
-  .neon-glow-accent {
-    box-shadow: 0 0 20px hsl(var(--accent) / 0.4),
-                0 0 40px hsl(var(--accent) / 0.2);
+  .orange-glow-sm {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3),
+                0 0 20px hsl(var(--primary) / 0.15);
   }
 
-  .neon-text {
+  .orange-text {
     text-shadow: 0 0 10px hsl(var(--primary) / 0.8),
-                 0 0 20px hsl(var(--primary) / 0.5),
-                 0 0 30px hsl(var(--primary) / 0.3);
+                 0 0 20px hsl(var(--primary) / 0.5);
   }
 
   /* Gradient text */
@@ -148,7 +148,7 @@
     inset: 0;
     padding: 1px;
     border-radius: inherit;
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--neon-purple)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -177,17 +177,6 @@
     animation: shimmer 2s infinite;
   }
 
-  /* Pulse animation for live indicators */
-  .pulse-live {
-    @apply relative;
-  }
-
-  .pulse-live::before {
-    content: '';
-    @apply absolute inset-0 rounded-full bg-accent;
-    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-  }
-
   /* Stats card hover effect */
   .stat-card {
     @apply relative overflow-hidden;
@@ -201,6 +190,16 @@
 
   .stat-card:hover::before {
     @apply opacity-100;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold rounded-xl transition-all duration-300;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.4);
+    transform: translateY(-2px);
   }
 }
 
@@ -243,17 +242,6 @@
   }
 }
 
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  80%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -272,10 +260,25 @@
   }
 }
 
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
 
 .animate-glow-pulse {
   animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
 }

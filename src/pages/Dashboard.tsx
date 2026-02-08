@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import TodaySessions from '@/components/dashboard/TodaySessions';
@@ -9,15 +10,37 @@ import {
   AthleteRadarChart,
   IntensityTrendChart,
 } from '@/components/dashboard/Charts';
-import { currentAthlete, weeklyStats } from '@/lib/mock-data';
+import { weeklyStats } from '@/lib/mock-data';
+import { useUser } from '@/contexts/UserContext';
 import { Activity, Flame, Target, Zap, Heart, TrendingUp } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { user, isLoading } = useUser();
   const latestStats = weeklyStats[weeklyStats.length - 1];
   const previousStats = weeklyStats[weeklyStats.length - 2];
 
+  useEffect(() => {
+    if (!isLoading && (!user || !user.hasCompletedOnboarding)) {
+      navigate('/');
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
   const calculateChange = (current: number, previous: number) =>
     Math.round(((current - previous) / previous) * 100);
+
+  // Calculate personalized metrics based on user data
+  const bmi = (user.weight / ((user.height / 100) ** 2)).toFixed(1);
+  const baseCalories = Math.round(user.weight * 7.5 * latestStats.sessions);
 
   return (
     <MainLayout>
@@ -27,22 +50,20 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-display text-3xl font-bold">
-          Bienvenido, <span className="gradient-text">{currentAthlete.name.split(' ')[0]}</span>
+        <h1 className="font-display text-4xl tracking-wide">
+          HOLA, <span className="gradient-text">{user.name.toUpperCase()}</span>
         </h1>
         <p className="text-muted-foreground mt-2">
-          Tu rendimiento está en el <span className="text-accent font-medium">top 15%</span> esta
-          semana. ¡Sigue así!
+          Tu entrenamiento de hoy está listo. ¡A por ello!
         </p>
       </motion.div>
 
       {/* Quick Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <MetricCard
-          title="VO2 Max"
-          value={currentAthlete.vo2max}
-          unit="ml/kg/min"
-          change={8}
+          title="IMC"
+          value={bmi}
+          unit=""
           icon={Heart}
           variant="primary"
           delay={0.1}
@@ -57,7 +78,7 @@ const Dashboard = () => {
         />
         <MetricCard
           title="Calorías Quemadas"
-          value={latestStats.calories.toLocaleString()}
+          value={baseCalories.toLocaleString()}
           unit="kcal"
           change={calculateChange(latestStats.calories, previousStats.calories)}
           icon={Flame}
@@ -66,7 +87,7 @@ const Dashboard = () => {
         />
         <MetricCard
           title="Nivel de Fatiga"
-          value={currentAthlete.fatigueLevel}
+          value={30}
           unit="%"
           change={-12}
           icon={Zap}
@@ -74,8 +95,8 @@ const Dashboard = () => {
           delay={0.25}
         />
         <MetricCard
-          title="Riesgo Lesión"
-          value={currentAthlete.injuryRisk}
+          title="Objetivo"
+          value={75}
           unit="%"
           icon={Target}
           variant="pink"
@@ -121,9 +142,9 @@ const Dashboard = () => {
           transition={{ delay: 0.65 }}
           className="lg:col-span-2 glass rounded-xl p-6"
         >
-          <h3 className="font-display font-semibold text-lg mb-4">Objetivos Activos</h3>
+          <h3 className="font-display text-xl tracking-wide mb-4">OBJETIVOS ACTIVOS</h3>
           <div className="space-y-4">
-            {currentAthlete.goals.map((goal, index) => (
+            {['Ganar masa muscular', 'Mejorar resistencia', 'Perder grasa'].map((goal, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{goal}</span>
