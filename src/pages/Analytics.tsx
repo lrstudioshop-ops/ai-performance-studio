@@ -5,7 +5,7 @@ import {
   WeeklyActivityChart,
   AthleteRadarChart,
 } from '@/components/dashboard/Charts';
-import { weeklyStats } from '@/lib/mock-data';
+import { weeklyStats, performanceHistory } from '@/lib/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import {
   AreaChart,
@@ -18,32 +18,101 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Activity, Target, Flame, Zap, Filter } from 'lucide-react';
-import { useState } from 'react';
+import { TrendingUp, TrendingDown, Activity, Target, Flame, Zap } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+
+type TimeFilter = 'week' | 'month' | 'year';
 
 const Analytics = () => {
   const { user } = useUser();
-  const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'year'>('month');
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('month');
 
-  // Training distribution data
-  const trainingDistribution = [
-    { name: 'Fuerza', value: 35, color: 'hsl(var(--primary))' },
-    { name: 'Resistencia', value: 25, color: 'hsl(var(--accent))' },
-    { name: 'Potencia', value: 20, color: 'hsl(25 95% 45%)' },
-    { name: 'Velocidad', value: 12, color: 'hsl(35 100% 50%)' },
-    { name: 'Movilidad', value: 8, color: 'hsl(0 0% 50%)' },
-  ];
+  // Generate data based on time filter
+  const getFilteredData = useMemo(() => {
+    switch (timeFilter) {
+      case 'week':
+        return {
+          stats: weeklyStats.slice(-1), // Last week
+          volumeData: weeklyStats.slice(-1).map((w) => ({
+            week: w.week,
+            volumen: w.sessions * w.duration * (w.avgIntensity / 100),
+          })),
+          multiplier: 1,
+          periodLabel: 'esta semana',
+          distribution: [
+            { name: 'Fuerza', value: 40, color: 'hsl(var(--primary))' },
+            { name: 'Resistencia', value: 30, color: 'hsl(var(--accent))' },
+            { name: 'Potencia', value: 15, color: 'hsl(25 95% 45%)' },
+            { name: 'Velocidad', value: 10, color: 'hsl(35 100% 50%)' },
+            { name: 'Movilidad', value: 5, color: 'hsl(0 0% 50%)' },
+          ],
+        };
+      case 'month':
+        return {
+          stats: weeklyStats.slice(-4), // Last 4 weeks
+          volumeData: weeklyStats.slice(-4).map((w) => ({
+            week: w.week,
+            volumen: w.sessions * w.duration * (w.avgIntensity / 100),
+          })),
+          multiplier: 4,
+          periodLabel: 'este mes',
+          distribution: [
+            { name: 'Fuerza', value: 35, color: 'hsl(var(--primary))' },
+            { name: 'Resistencia', value: 25, color: 'hsl(var(--accent))' },
+            { name: 'Potencia', value: 20, color: 'hsl(25 95% 45%)' },
+            { name: 'Velocidad', value: 12, color: 'hsl(35 100% 50%)' },
+            { name: 'Movilidad', value: 8, color: 'hsl(0 0% 50%)' },
+          ],
+        };
+      case 'year':
+        return {
+          stats: weeklyStats, // All weeks (representing year data)
+          volumeData: performanceHistory.map((p) => ({
+            week: new Date(p.date).toLocaleDateString('es', { month: 'short' }),
+            volumen: (p.strength + p.endurance + p.power) * 2,
+          })),
+          multiplier: 52,
+          periodLabel: 'este año',
+          distribution: [
+            { name: 'Fuerza', value: 32, color: 'hsl(var(--primary))' },
+            { name: 'Resistencia', value: 28, color: 'hsl(var(--accent))' },
+            { name: 'Potencia', value: 18, color: 'hsl(25 95% 45%)' },
+            { name: 'Velocidad', value: 14, color: 'hsl(35 100% 50%)' },
+            { name: 'Movilidad', value: 8, color: 'hsl(0 0% 50%)' },
+          ],
+        };
+      default:
+        return {
+          stats: weeklyStats,
+          volumeData: [],
+          multiplier: 1,
+          periodLabel: '',
+          distribution: [],
+        };
+    }
+  }, [timeFilter]);
 
-  // Weekly volume data
-  const volumeData = weeklyStats.map((w) => ({
-    week: w.week,
-    volumen: w.sessions * w.duration * (w.avgIntensity / 100),
-  }));
-
-  // Calculate personalized calories based on user weight
-  const baseCalories = user ? Math.round(user.weight * 7.5) : 500;
+  // Calculate stats based on filter
+  const calculateStats = useMemo(() => {
+    const baseData = getFilteredData.stats;
+    const totalSessions = baseData.reduce((acc, w) => acc + w.sessions, 0);
+    const totalCalories = baseData.reduce((acc, w) => acc + w.calories, 0);
+    const avgIntensity = Math.round(baseData.reduce((acc, w) => acc + w.avgIntensity, 0) / baseData.length);
+    
+    const baseWeight = user?.weight || 75;
+    const volumeMultiplier = timeFilter === 'week' ? 1 : timeFilter === 'month' ? 4 : 52;
+    
+    return {
+      volume: Math.round(baseWeight * totalSessions * 15 * volumeMultiplier / (timeFilter === 'year' ? 4 : 1)),
+      load: Math.round(totalSessions * avgIntensity * 3),
+      calories: totalCalories,
+      formIndex: avgIntensity + 10,
+    };
+  }, [getFilteredData, timeFilter, user]);
 
   return (
     <MainLayout>
@@ -58,25 +127,27 @@ const Analytics = () => {
             <span className="gradient-text">ANALÍTICA</span>
           </h1>
           <p className="text-muted-foreground mt-2">
-            Análisis detallado de tu rendimiento y progreso
+            Análisis detallado de tu rendimiento {getFilteredData.periodLabel}
           </p>
         </div>
         
         {/* Time Filter */}
         <div className="flex items-center gap-2 bg-secondary/50 p-1 rounded-lg">
           {(['week', 'month', 'year'] as const).map((filter) => (
-            <button
+            <motion.button
               key={filter}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setTimeFilter(filter)}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300',
                 timeFilter === filter
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground shadow-lg'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
               )}
             >
               {filter === 'week' ? 'Semana' : filter === 'month' ? 'Mes' : 'Año'}
-            </button>
+            </motion.button>
           ))}
         </div>
       </motion.div>
@@ -86,30 +157,30 @@ const Analytics = () => {
         {[
           {
             title: 'Volumen Total',
-            value: '12,450',
+            value: calculateStats.volume.toLocaleString(),
             unit: 'kg',
-            change: 15,
+            change: timeFilter === 'week' ? 8 : timeFilter === 'month' ? 15 : 45,
             icon: Activity,
           },
           {
             title: 'Carga Semanal',
-            value: '2,890',
+            value: calculateStats.load.toLocaleString(),
             unit: 'AU',
-            change: 8,
+            change: timeFilter === 'week' ? 5 : timeFilter === 'month' ? 8 : 22,
             icon: Target,
           },
           {
-            title: 'Calorías Mes',
-            value: (baseCalories * 30).toLocaleString(),
+            title: `Calorías ${timeFilter === 'week' ? 'Semana' : timeFilter === 'month' ? 'Mes' : 'Año'}`,
+            value: calculateStats.calories.toLocaleString(),
             unit: 'kcal',
-            change: 12,
+            change: timeFilter === 'week' ? 3 : timeFilter === 'month' ? 12 : 35,
             icon: Flame,
           },
           {
             title: 'Índice Forma',
-            value: '87',
+            value: calculateStats.formIndex.toString(),
             unit: '%',
-            change: -3,
+            change: timeFilter === 'week' ? -2 : timeFilter === 'month' ? -3 : 8,
             icon: Zap,
           },
         ].map((stat, index) => (
@@ -157,7 +228,7 @@ const Analytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <WeeklyActivityChart delay={0.3} />
 
-        {/* Training Distribution */}
+        {/* Training Distribution - Updates based on filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -165,12 +236,14 @@ const Analytics = () => {
           className="glass rounded-xl p-6"
         >
           <h3 className="font-display text-xl tracking-wide mb-2">DISTRIBUCIÓN DE ENTRENAMIENTO</h3>
-          <p className="text-sm text-muted-foreground mb-4">Por tipo de ejercicio</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Por tipo de ejercicio ({timeFilter === 'week' ? 'última semana' : timeFilter === 'month' ? 'último mes' : 'último año'})
+          </p>
           <div className="flex items-center">
             <ResponsiveContainer width="50%" height={200}>
               <PieChart>
                 <Pie
-                  data={trainingDistribution}
+                  data={getFilteredData.distribution}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -178,14 +251,14 @@ const Analytics = () => {
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {trainingDistribution.map((entry, index) => (
+                  {getFilteredData.distribution.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="flex-1 space-y-2">
-              {trainingDistribution.map((item) => (
+              {getFilteredData.distribution.map((item) => (
                 <div key={item.name} className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full"
@@ -200,7 +273,7 @@ const Analytics = () => {
         </motion.div>
       </div>
 
-      {/* Volume Trend */}
+      {/* Volume Trend - Updates based on filter */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -208,35 +281,58 @@ const Analytics = () => {
         className="glass rounded-xl p-6"
       >
         <h3 className="font-display text-xl tracking-wide mb-2">VOLUMEN DE ENTRENAMIENTO</h3>
-        <p className="text-sm text-muted-foreground mb-4">Carga total semanal (unidades arbitrarias)</p>
+        <p className="text-sm text-muted-foreground mb-4">
+          Carga total {timeFilter === 'week' ? 'diaria' : timeFilter === 'month' ? 'semanal' : 'mensual'} (unidades arbitrarias)
+        </p>
         <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={volumeData}>
-            <defs>
-              <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="volumen"
-              stroke="hsl(var(--primary))"
-              fillOpacity={1}
-              fill="url(#colorVolume)"
-              strokeWidth={2}
-              name="Volumen"
-            />
-          </AreaChart>
+          {timeFilter === 'year' ? (
+            <BarChart data={getFilteredData.volumeData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                }}
+              />
+              <Bar
+                dataKey="volumen"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                name="Volumen"
+              />
+            </BarChart>
+          ) : (
+            <AreaChart data={getFilteredData.volumeData}>
+              <defs>
+                <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="volumen"
+                stroke="hsl(var(--primary))"
+                fillOpacity={1}
+                fill="url(#colorVolume)"
+                strokeWidth={2}
+                name="Volumen"
+              />
+            </AreaChart>
+          )}
         </ResponsiveContainer>
       </motion.div>
     </MainLayout>
