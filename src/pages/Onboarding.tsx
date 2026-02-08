@@ -33,81 +33,28 @@ const levels: { id: 'bajo' | 'intermedio' | 'elite' | 'profesional'; name: strin
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { setUser, user, isLoading } = useUser();
+  const { setUser } = useUser();
   const [step, setStep] = useState(1);
   const [showVideo, setShowVideo] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   
-  // Cargar datos desde sessionStorage si existen (para sobrevivir F5)
-  const getInitialFormData = () => {
-    const savedProgress = sessionStorage.getItem('larios_onboarding_progress');
-    if (savedProgress) {
-      try {
-        const parsed = JSON.parse(savedProgress);
-        return {
-          name: parsed.name || '',
-          weight: parsed.weight || 70,
-          height: parsed.height || 175,
-          sport: parsed.sport || '',
-          level: parsed.level || 'intermedio',
-        };
-      } catch {
-        return {
-          name: '',
-          weight: 70,
-          height: 175,
-          sport: '',
-          level: 'intermedio' as const,
-        };
-      }
-    }
-    return {
-      name: '',
-      weight: 70,
-      height: 175,
-      sport: '',
-      level: 'intermedio' as const,
-    };
-  };
-
   const [formData, setFormData] = useState<{
     name: string;
     weight: number;
     height: number;
     sport: string;
     level: 'bajo' | 'intermedio' | 'elite' | 'profesional';
-  }>(getInitialFormData);
+  }>({
+    name: '',
+    weight: 70,
+    height: 175,
+    sport: '',
+    level: 'intermedio',
+  });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Redirigir si ya completó onboarding
-  useEffect(() => {
-    if (!isLoading && user?.hasCompletedOnboarding) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [isLoading, user, navigate]);
-
-  // Cargar step guardado desde sessionStorage
-  useEffect(() => {
-    const savedStep = sessionStorage.getItem('larios_onboarding_step');
-    if (savedStep) {
-      const parsedStep = parseInt(savedStep, 10);
-      if (parsedStep >= 1 && parsedStep <= 3) {
-        setStep(parsedStep);
-      }
-    }
-  }, []);
-
-  // Guardar progreso en sessionStorage cuando cambia formData o step
-  useEffect(() => {
-    // Solo guardar si hay datos ingresados (no la primera entrada vacía)
-    if (formData.name || formData.sport || formData.weight !== 70 || formData.height !== 175) {
-      sessionStorage.setItem('larios_onboarding_progress', JSON.stringify(formData));
-      sessionStorage.setItem('larios_onboarding_step', step.toString());
-    }
-  }, [formData, step]);
-
-  // Video simulation effect
+  // Video simulation effect - al completar, guardar y navegar al dashboard
   useEffect(() => {
     if (showVideo) {
       const interval = setInterval(() => {
@@ -115,10 +62,6 @@ const Onboarding = () => {
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              // Limpiar sessionStorage y guardar en localStorage al completar
-              sessionStorage.removeItem('larios_onboarding_progress');
-              sessionStorage.removeItem('larios_onboarding_step');
-              
               const newUser: UserProfile = {
                 ...formData,
                 hasCompletedOnboarding: true,
