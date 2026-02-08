@@ -14,56 +14,45 @@ interface UserContextType {
   setUser: (user: UserProfile) => void;
   updateUser: (updates: Partial<UserProfile>) => void;
   isLoading: boolean;
-  hasSeenWelcome: boolean;
-  setHasSeenWelcome: (value: boolean) => void;
 }
-
-const defaultUser: UserProfile = {
-  name: '',
-  weight: 70,
-  height: 175,
-  sport: '',
-  level: 'intermedio',
-  hasCompletedOnboarding: false,
-};
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUserState] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
 
   useEffect(() => {
-    // Load user data from localStorage
+    // Solo cargar datos desde localStorage (persistencia real)
     const savedUser = localStorage.getItem('larios_user');
-    const welcomeSeen = localStorage.getItem('larios_welcome_seen');
     
     if (savedUser) {
-      setUserState(JSON.parse(savedUser));
-    }
-    if (welcomeSeen) {
-      setHasSeenWelcome(true);
+      try {
+        setUserState(JSON.parse(savedUser));
+      } catch {
+        // Si hay error parseando, limpiar
+        localStorage.removeItem('larios_user');
+      }
     }
     setIsLoading(false);
   }, []);
 
   const setUser = (newUser: UserProfile) => {
     setUserState(newUser);
-    localStorage.setItem('larios_user', JSON.stringify(newUser));
+    // Solo guardar en localStorage cuando se completa el onboarding
+    if (newUser.hasCompletedOnboarding) {
+      localStorage.setItem('larios_user', JSON.stringify(newUser));
+    }
   };
 
   const updateUser = (updates: Partial<UserProfile>) => {
     if (user) {
       const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-    }
-  };
-
-  const handleSetHasSeenWelcome = (value: boolean) => {
-    setHasSeenWelcome(value);
-    if (value) {
-      localStorage.setItem('larios_welcome_seen', 'true');
+      setUserState(updatedUser);
+      // Actualizar localStorage si ya completó onboarding
+      if (updatedUser.hasCompletedOnboarding) {
+        localStorage.setItem('larios_user', JSON.stringify(updatedUser));
+      }
     }
   };
 
@@ -74,8 +63,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser,
         updateUser,
         isLoading,
-        hasSeenWelcome,
-        setHasSeenWelcome: handleSetHasSeenWelcome,
       }}
     >
       {children}
