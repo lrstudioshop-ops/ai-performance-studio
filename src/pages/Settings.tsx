@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
 import { useUser } from '@/contexts/UserContext';
@@ -17,41 +18,97 @@ import {
   Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import PersonalInfoModal from '@/components/settings/PersonalInfoModal';
+import TrainingPreferencesModal from '@/components/settings/TrainingPreferencesModal';
+import PrivacyModal from '@/components/settings/PrivacyModal';
+import AppearanceModal from '@/components/settings/AppearanceModal';
+import HelpModal from '@/components/settings/HelpModal';
+
+type ModalType = 'personal' | 'privacy' | 'training' | 'appearance' | 'help' | null;
 
 const Settings = () => {
-  const navigate = useNavigate();
   const { user, updateUser } = useUser();
-  const [notifications, setNotifications] = useState({
-    training: true,
-    reminders: true,
-    weekly: false,
-    tips: true,
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('larios_notifications');
+    return saved ? JSON.parse(saved) : {
+      training: true,
+      reminders: true,
+      weekly: false,
+      tips: true,
+    };
   });
+
+  const handleNotificationChange = (key: string) => {
+    const newSettings = { ...notifications, [key]: !notifications[key as keyof typeof notifications] };
+    setNotifications(newSettings);
+    localStorage.setItem('larios_notifications', JSON.stringify(newSettings));
+    toast.success('Notificaciones actualizadas');
+  };
 
   const settingsSections = [
     {
       title: 'Cuenta',
       items: [
-        { icon: User, label: 'Información Personal', description: 'Nombre, peso, altura' },
-        { icon: Shield, label: 'Privacidad', description: 'Datos y permisos' },
+        { 
+          icon: User, 
+          label: 'Información Personal', 
+          description: 'Nombre, peso, altura',
+          action: () => setActiveModal('personal'),
+        },
+        { 
+          icon: Shield, 
+          label: 'Privacidad', 
+          description: 'Datos y permisos',
+          action: () => setActiveModal('privacy'),
+        },
       ],
     },
     {
       title: 'Preferencias de Entrenamiento',
       items: [
-        { icon: Dumbbell, label: 'Deporte', description: user?.sport || 'No definido' },
-        { icon: Trophy, label: 'Nivel', description: user?.level || 'Intermedio' },
-        { icon: Scale, label: 'Peso', description: `${user?.weight || 70} kg` },
-        { icon: Ruler, label: 'Altura', description: `${user?.height || 175} cm` },
+        { 
+          icon: Dumbbell, 
+          label: 'Deporte', 
+          description: user?.sport || 'No definido',
+          action: () => setActiveModal('training'),
+        },
+        { 
+          icon: Trophy, 
+          label: 'Nivel', 
+          description: user?.level || 'Intermedio',
+          action: () => setActiveModal('training'),
+        },
+        { 
+          icon: Scale, 
+          label: 'Peso', 
+          description: `${user?.weight || 70} kg`,
+          action: () => setActiveModal('personal'),
+        },
+        { 
+          icon: Ruler, 
+          label: 'Altura', 
+          description: `${user?.height || 175} cm`,
+          action: () => setActiveModal('personal'),
+        },
       ],
     },
     {
       title: 'Preferencias',
       items: [
-        { icon: Palette, label: 'Apariencia', description: 'Tema oscuro' },
-        { icon: Globe, label: 'Idioma', description: 'Español' },
+        { 
+          icon: Palette, 
+          label: 'Apariencia', 
+          description: 'Tema oscuro',
+          action: () => setActiveModal('appearance'),
+        },
+        { 
+          icon: Globe, 
+          label: 'Idioma', 
+          description: 'Español (único)',
+          action: () => toast.info('La aplicación solo está disponible en español'),
+        },
       ],
     },
   ];
@@ -59,11 +116,36 @@ const Settings = () => {
   const handleLogout = () => {
     localStorage.removeItem('larios_user');
     localStorage.removeItem('larios_welcome_seen');
+    localStorage.removeItem('larios_notifications');
+    localStorage.removeItem('larios_privacy');
+    toast.success('Sesión cerrada correctamente');
     window.location.href = '/';
   };
 
   return (
     <MainLayout>
+      {/* Modals */}
+      <PersonalInfoModal 
+        isOpen={activeModal === 'personal'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <TrainingPreferencesModal 
+        isOpen={activeModal === 'training'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <PrivacyModal 
+        isOpen={activeModal === 'privacy'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <AppearanceModal 
+        isOpen={activeModal === 'appearance'} 
+        onClose={() => setActiveModal(null)} 
+      />
+      <HelpModal 
+        isOpen={activeModal === 'help'} 
+        onClose={() => setActiveModal(null)} 
+      />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -95,6 +177,7 @@ const Settings = () => {
                   <motion.button
                     key={item.label}
                     whileHover={{ scale: 1.01, x: 4 }}
+                    onClick={item.action}
                     className="w-full flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border hover:border-primary/50 transition-all duration-300"
                   >
                     <div className="flex items-center gap-4">
@@ -170,12 +253,7 @@ const Settings = () => {
                     <p className="text-xs text-muted-foreground">{item.description}</p>
                   </div>
                   <button
-                    onClick={() =>
-                      setNotifications((prev) => ({
-                        ...prev,
-                        [item.key]: !prev[item.key as keyof typeof prev],
-                      }))
-                    }
+                    onClick={() => handleNotificationChange(item.key)}
                     className={cn(
                       'w-12 h-6 rounded-full transition-all duration-300 relative',
                       notifications[item.key as keyof typeof notifications]
@@ -203,13 +281,16 @@ const Settings = () => {
             className="glass rounded-xl p-6"
           >
             <h3 className="font-display text-xl tracking-wide mb-4">TEMA</h3>
-            <div className="p-4 rounded-lg bg-secondary/50 border border-primary flex items-center gap-3">
+            <button
+              onClick={() => setActiveModal('appearance')}
+              className="w-full p-4 rounded-lg bg-secondary/50 border border-primary flex items-center gap-3 hover:bg-secondary transition-colors"
+            >
               <Moon className="h-6 w-6 text-primary" />
-              <div>
+              <div className="text-left">
                 <p className="font-medium">Modo Oscuro</p>
                 <p className="text-xs text-muted-foreground">Activado</p>
               </div>
-            </div>
+            </button>
           </motion.div>
 
           {/* Help */}
@@ -224,13 +305,22 @@ const Settings = () => {
               <h3 className="font-display text-xl tracking-wide">AYUDA</h3>
             </div>
             <div className="space-y-2">
-              <button className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors">
+              <button 
+                onClick={() => setActiveModal('help')}
+                className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors"
+              >
                 Centro de ayuda
               </button>
-              <button className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors">
+              <button 
+                onClick={() => toast.info('Soporte: soporte@larios.app')}
+                className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors"
+              >
                 Contactar soporte
               </button>
-              <button className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors">
+              <button 
+                onClick={() => toast.success('¡Gracias por tu feedback!')}
+                className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors"
+              >
                 Enviar feedback
               </button>
             </div>

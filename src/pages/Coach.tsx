@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import { coachTips, trainingSchedule, exercises } from '@/lib/mock-data';
+import { coachTips } from '@/lib/mock-data';
 import { useUser } from '@/contexts/UserContext';
 import {
   MessageSquare,
@@ -14,6 +15,7 @@ import {
   Play,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const categoryIcons = {
   nutricion: Apple,
@@ -30,6 +32,7 @@ const categoryColors = {
 };
 
 const Coach = () => {
+  const navigate = useNavigate();
   const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -47,6 +50,15 @@ const Coach = () => {
       { name: 'Core', duration: '10 min', intensity: 'Media' },
       { name: 'Enfriamiento', duration: '5 min', intensity: 'Baja' },
     ],
+  };
+
+  const handleTipClick = (tipId: string) => {
+    navigate(`/coach/${tipId}`);
+  };
+
+  const handleStartRoutine = () => {
+    toast.success('¡Rutina iniciada! Ve a Entrenamiento para comenzar');
+    navigate('/training');
   };
 
   return (
@@ -120,12 +132,15 @@ const Coach = () => {
               const colorClass = categoryColors[tip.category];
 
               return (
-                <motion.div
+                <motion.button
                   key={tip.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.25 + index * 0.05 }}
-                  className="glass rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer group"
+                  whileHover={{ scale: 1.01, x: 4 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => handleTipClick(tip.id)}
+                  className="w-full glass rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer group text-left"
                 >
                   <div className="flex items-start gap-4">
                     <div className={cn('p-3 rounded-lg', colorClass)}>
@@ -139,7 +154,7 @@ const Coach = () => {
                       <p className="text-sm text-muted-foreground">{tip.description}</p>
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               );
             })}
           </motion.div>
@@ -191,6 +206,7 @@ const Coach = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleStartRoutine}
               className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold flex items-center justify-center gap-2"
             >
               <Play className="h-5 w-5" />

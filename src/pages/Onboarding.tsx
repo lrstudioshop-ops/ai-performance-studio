@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useUser, UserProfile } from '@/contexts/UserContext';
@@ -11,7 +11,9 @@ import {
   ChevronRight,
   ChevronLeft,
   Check,
+  Play,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const sports = [
   { id: 'crossfit', name: 'Crossfit', icon: '🏋️' },
@@ -33,6 +35,8 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const { setUser, user } = useUser();
   const [step, setStep] = useState(1);
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const [formData, setFormData] = useState<{
     name: string;
     weight: number;
@@ -46,39 +50,209 @@ const Onboarding = () => {
     sport: user?.sport || '',
     level: user?.level || 'intermedio',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Video simulation effect
+  useEffect(() => {
+    if (showVideo) {
+      const interval = setInterval(() => {
+        setVideoProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              // Save user and navigate to dashboard
+              const newUser: UserProfile = {
+                ...formData,
+                hasCompletedOnboarding: true,
+              };
+              setUser(newUser);
+              navigate('/dashboard');
+            }, 500);
+            return 100;
+          }
+          return prev + 2;
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [showVideo, formData, setUser, navigate]);
+
+  const validateStep = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    switch (step) {
+      case 1:
+        if (!formData.name.trim()) {
+          newErrors.name = 'El nombre es obligatorio';
+        } else if (formData.name.trim().length < 2) {
+          newErrors.name = 'El nombre debe tener al menos 2 caracteres';
+        }
+        if (formData.weight < 30 || formData.weight > 300) {
+          newErrors.weight = 'Peso debe estar entre 30 y 300 kg';
+        }
+        if (formData.height < 100 || formData.height > 250) {
+          newErrors.height = 'Altura debe estar entre 100 y 250 cm';
+        }
+        break;
+      case 2:
+        if (!formData.sport) {
+          newErrors.sport = 'Selecciona un deporte';
+        }
+        break;
+      case 3:
+        // Level always has a default, so valid
+        break;
+    }
+
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError);
+      return false;
+    }
+    
+    return true;
+  };
 
   const handleNext = () => {
+    if (!validateStep()) return;
+
     if (step < 3) {
       setStep(step + 1);
     } else {
-      // Complete onboarding
-      const newUser: UserProfile = {
-        ...formData,
-        hasCompletedOnboarding: true,
-      };
-      setUser(newUser);
-      navigate('/dashboard');
+      // Show video before completing
+      setShowVideo(true);
     }
   };
 
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
+      setErrors({});
     }
   };
 
   const canProceed = () => {
     switch (step) {
       case 1:
-        return formData.name.trim().length > 0;
+        return formData.name.trim().length > 0 && formData.weight > 0 && formData.height > 0;
       case 2:
         return formData.sport !== '';
       case 3:
-        return true; // level always has a default value
+        return true;
       default:
         return false;
     }
   };
+
+  // Video screen
+  if (showVideo) {
+    return (
+      <div className="fixed inset-0 bg-background overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-gradient-to-br from-background via-larios-black to-background"
+        >
+          {/* Animated background elements */}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-primary/30 blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 0.3,
+            }}
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/30 blur-3xl"
+          />
+
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-8 orange-glow"
+            >
+              <Dumbbell className="w-12 h-12 text-primary-foreground" />
+            </motion.div>
+
+            <motion.h1
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="font-display text-5xl md:text-6xl tracking-widest mb-4 text-center"
+            >
+              <span className="gradient-text">¡BIENVENIDO, {formData.name.toUpperCase()}!</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-xl text-muted-foreground text-center mb-8"
+            >
+              Preparando tu experiencia personalizada...
+            </motion.p>
+
+            {/* Motivational video simulation */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="w-full max-w-md space-y-4"
+            >
+              {/* Video thumbnail simulation */}
+              <div className="aspect-video rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 overflow-hidden relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    className="w-16 h-16 rounded-full bg-primary/30 flex items-center justify-center"
+                  >
+                    <Play className="w-8 h-8 text-primary" />
+                  </motion.div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <p className="text-sm text-center text-muted-foreground">
+                    🏋️ Crossfit • 🏊 Natación • 🏃 Running • 💪 Fitness
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${videoProgress}%` }}
+                  className="h-full bg-gradient-to-r from-primary to-accent"
+                />
+              </div>
+              <p className="text-center text-sm text-muted-foreground">
+                {videoProgress < 100 ? 'Cargando tu plan personalizado...' : '¡Listo!'}
+              </p>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -118,40 +292,62 @@ const Onboarding = () => {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tu nombre</label>
+                  <label className="block text-sm font-medium mb-2">Tu nombre *</label>
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (errors.name) setErrors({ ...errors, name: '' });
+                    }}
                     placeholder="¿Cómo te llamas?"
-                    className="w-full h-14 px-4 bg-secondary border border-border rounded-xl text-lg focus:outline-none focus:border-primary transition-colors"
+                    className={`w-full h-14 px-4 bg-secondary border rounded-xl text-lg focus:outline-none transition-colors ${
+                      errors.name ? 'border-destructive' : 'border-border focus:border-primary'
+                    }`}
                   />
+                  {errors.name && <p className="text-destructive text-sm mt-1">{errors.name}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                       <Scale className="w-4 h-4 text-primary" />
-                      Peso (kg)
+                      Peso (kg) *
                     </label>
                     <input
                       type="number"
                       value={formData.weight}
-                      onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
-                      className="w-full h-14 px-4 bg-secondary border border-border rounded-xl text-lg text-center focus:outline-none focus:border-primary transition-colors"
+                      onChange={(e) => {
+                        setFormData({ ...formData, weight: Number(e.target.value) });
+                        if (errors.weight) setErrors({ ...errors, weight: '' });
+                      }}
+                      className={`w-full h-14 px-4 bg-secondary border rounded-xl text-lg text-center focus:outline-none transition-colors ${
+                        errors.weight ? 'border-destructive' : 'border-border focus:border-primary'
+                      }`}
+                      min={30}
+                      max={300}
                     />
+                    {errors.weight && <p className="text-destructive text-xs mt-1">{errors.weight}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                       <Ruler className="w-4 h-4 text-primary" />
-                      Altura (cm)
+                      Altura (cm) *
                     </label>
                     <input
                       type="number"
                       value={formData.height}
-                      onChange={(e) => setFormData({ ...formData, height: Number(e.target.value) })}
-                      className="w-full h-14 px-4 bg-secondary border border-border rounded-xl text-lg text-center focus:outline-none focus:border-primary transition-colors"
+                      onChange={(e) => {
+                        setFormData({ ...formData, height: Number(e.target.value) });
+                        if (errors.height) setErrors({ ...errors, height: '' });
+                      }}
+                      className={`w-full h-14 px-4 bg-secondary border rounded-xl text-lg text-center focus:outline-none transition-colors ${
+                        errors.height ? 'border-destructive' : 'border-border focus:border-primary'
+                      }`}
+                      min={100}
+                      max={250}
                     />
+                    {errors.height && <p className="text-destructive text-xs mt-1">{errors.height}</p>}
                   </div>
                 </div>
               </div>
@@ -172,6 +368,7 @@ const Onboarding = () => {
                 </div>
                 <h2 className="font-display text-3xl tracking-wide mb-2">TU DEPORTE</h2>
                 <p className="text-muted-foreground">¿Qué tipo de entrenamiento te interesa?</p>
+                {errors.sport && <p className="text-destructive text-sm mt-2">{errors.sport}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -180,7 +377,10 @@ const Onboarding = () => {
                     key={sport.id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setFormData({ ...formData, sport: sport.id })}
+                    onClick={() => {
+                      setFormData({ ...formData, sport: sport.id });
+                      if (errors.sport) setErrors({ ...errors, sport: '' });
+                    }}
                     className={`p-6 rounded-xl border-2 transition-all duration-300 text-left relative ${
                       formData.sport === sport.id
                         ? 'border-primary bg-primary/10'
