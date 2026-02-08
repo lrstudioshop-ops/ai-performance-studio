@@ -7,12 +7,11 @@ import {
   BarChart3,
   Calendar,
   User,
-  Brain,
+  MessageSquare,
   Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Zap,
   Library,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -49,7 +48,7 @@ const NavItem = ({ to, icon: Icon, label, collapsed }: NavItemProps) => {
             transition={{ duration: 0.2 }}
           />
         )}
-        <Icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'neon-glow')} />
+        <Icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'text-primary')} />
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.span
@@ -71,12 +70,12 @@ const AppSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const mainNavItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/training', icon: Dumbbell, label: 'Entrenamiento' },
     { to: '/exercises', icon: Library, label: 'Ejercicios' },
     { to: '/analytics', icon: BarChart3, label: 'Analítica' },
     { to: '/calendar', icon: Calendar, label: 'Calendario' },
-    { to: '/ai-coach', icon: Brain, label: 'IA Coach' },
+    { to: '/coach', icon: MessageSquare, label: 'Coach' },
     { to: '/profile', icon: User, label: 'Perfil' },
   ];
 
@@ -99,7 +98,7 @@ const AppSidebar = () => {
         >
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-glow-pulse">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+              <Dumbbell className="h-5 w-5 text-primary-foreground" />
             </div>
           </div>
           <AnimatePresence mode="wait">
@@ -110,8 +109,7 @@ const AppSidebar = () => {
                 exit={{ opacity: 0, x: -10 }}
                 className="flex flex-col"
               >
-                <span className="font-display font-bold text-sm gradient-text">AI STUDIO</span>
-                <span className="text-xs text-muted-foreground">Performance</span>
+                <span className="font-display text-2xl tracking-widest gradient-text">LARIOS</span>
               </motion.div>
             )}
           </AnimatePresence>

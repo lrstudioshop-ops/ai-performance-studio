@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
+import { useUser } from '@/contexts/UserContext';
 import {
   User,
   Bell,
@@ -10,49 +11,56 @@ import {
   LogOut,
   ChevronRight,
   Moon,
-  Sun,
-  Smartphone,
-  Mail,
-  Lock,
-  Eye,
-  Database,
+  Scale,
+  Ruler,
+  Dumbbell,
+  Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Settings = () => {
+  const navigate = useNavigate();
+  const { user, updateUser } = useUser();
   const [notifications, setNotifications] = useState({
     training: true,
-    ai: true,
+    reminders: true,
     weekly: false,
-    marketing: false,
+    tips: true,
   });
 
   const settingsSections = [
     {
       title: 'Cuenta',
       items: [
-        { icon: User, label: 'Información Personal', description: 'Nombre, email, teléfono' },
-        { icon: Lock, label: 'Seguridad', description: 'Contraseña, 2FA' },
+        { icon: User, label: 'Información Personal', description: 'Nombre, peso, altura' },
         { icon: Shield, label: 'Privacidad', description: 'Datos y permisos' },
+      ],
+    },
+    {
+      title: 'Preferencias de Entrenamiento',
+      items: [
+        { icon: Dumbbell, label: 'Deporte', description: user?.sport || 'No definido' },
+        { icon: Trophy, label: 'Nivel', description: user?.level || 'Intermedio' },
+        { icon: Scale, label: 'Peso', description: `${user?.weight || 70} kg` },
+        { icon: Ruler, label: 'Altura', description: `${user?.height || 175} cm` },
       ],
     },
     {
       title: 'Preferencias',
       items: [
-        { icon: Palette, label: 'Apariencia', description: 'Tema y personalización' },
-        { icon: Globe, label: 'Idioma y Región', description: 'Español (ES)' },
-        { icon: Smartphone, label: 'Dispositivos', description: '2 dispositivos conectados' },
-      ],
-    },
-    {
-      title: 'Datos',
-      items: [
-        { icon: Database, label: 'Exportar Datos', description: 'Descargar historial completo' },
-        { icon: Eye, label: 'Integraciones', description: 'Conectar apps externas' },
+        { icon: Palette, label: 'Apariencia', description: 'Tema oscuro' },
+        { icon: Globe, label: 'Idioma', description: 'Español' },
       ],
     },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem('larios_user');
+    localStorage.removeItem('larios_welcome_seen');
+    window.location.href = '/';
+  };
 
   return (
     <MainLayout>
@@ -62,8 +70,8 @@ const Settings = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="font-display text-3xl font-bold">
-          <span className="gradient-text">Ajustes</span>
+        <h1 className="font-display text-4xl tracking-wide">
+          <span className="gradient-text">AJUSTES</span>
         </h1>
         <p className="text-muted-foreground mt-2">
           Configura tu cuenta y preferencias
@@ -81,9 +89,9 @@ const Settings = () => {
               transition={{ delay: 0.1 + sectionIndex * 0.1 }}
               className="glass rounded-xl p-6"
             >
-              <h2 className="font-display font-semibold text-lg mb-4">{section.title}</h2>
+              <h2 className="font-display text-xl tracking-wide mb-4">{section.title.toUpperCase()}</h2>
               <div className="space-y-2">
-                {section.items.map((item, index) => (
+                {section.items.map((item) => (
                   <motion.button
                     key={item.label}
                     whileHover={{ scale: 1.01, x: 4 }}
@@ -95,7 +103,7 @@ const Settings = () => {
                       </div>
                       <div className="text-left">
                         <p className="font-medium">{item.label}</p>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{item.description}</p>
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -112,17 +120,20 @@ const Settings = () => {
             transition={{ delay: 0.4 }}
             className="glass rounded-xl p-6 border-destructive/30"
           >
-            <h2 className="font-display font-semibold text-lg mb-4 text-destructive">
-              Zona de Peligro
+            <h2 className="font-display text-xl tracking-wide mb-4 text-destructive">
+              ZONA DE PELIGRO
             </h2>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-4 rounded-lg bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between p-4 rounded-lg bg-destructive/10 border border-destructive/30 hover:bg-destructive/20 transition-colors"
+              >
                 <div className="flex items-center gap-4">
                   <LogOut className="h-5 w-5 text-destructive" />
                   <div className="text-left">
                     <p className="font-medium text-destructive">Cerrar Sesión</p>
                     <p className="text-sm text-muted-foreground">
-                      Salir de todos los dispositivos
+                      Salir y borrar datos locales
                     </p>
                   </div>
                 </div>
@@ -141,14 +152,14 @@ const Settings = () => {
           >
             <div className="flex items-center gap-3 mb-6">
               <Bell className="h-5 w-5 text-primary" />
-              <h2 className="font-display font-semibold text-lg">Notificaciones</h2>
+              <h2 className="font-display text-xl tracking-wide">NOTIFICACIONES</h2>
             </div>
             <div className="space-y-4">
               {[
                 { key: 'training', label: 'Recordatorios de entrenamiento', description: 'Alertas antes de cada sesión' },
-                { key: 'ai', label: 'Insights de IA', description: 'Recomendaciones personalizadas' },
-                { key: 'weekly', label: 'Resumen semanal', description: 'Email con tu progreso' },
-                { key: 'marketing', label: 'Novedades y ofertas', description: 'Promociones y updates' },
+                { key: 'reminders', label: 'Recordatorios diarios', description: 'Motivación para entrenar' },
+                { key: 'weekly', label: 'Resumen semanal', description: 'Tu progreso de la semana' },
+                { key: 'tips', label: 'Consejos del coach', description: 'Tips de entrenamiento' },
               ].map((item) => (
                 <div
                   key={item.key}
@@ -184,23 +195,20 @@ const Settings = () => {
             </div>
           </motion.div>
 
-          {/* Theme Toggle */}
+          {/* Theme */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
             className="glass rounded-xl p-6"
           >
-            <h3 className="font-display font-semibold text-lg mb-4">Tema</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 rounded-lg bg-secondary/50 border border-primary flex flex-col items-center gap-2">
-                <Moon className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Oscuro</span>
-              </button>
-              <button className="p-4 rounded-lg bg-secondary/30 border border-border flex flex-col items-center gap-2 opacity-50">
-                <Sun className="h-6 w-6" />
-                <span className="text-sm font-medium">Claro</span>
-              </button>
+            <h3 className="font-display text-xl tracking-wide mb-4">TEMA</h3>
+            <div className="p-4 rounded-lg bg-secondary/50 border border-primary flex items-center gap-3">
+              <Moon className="h-6 w-6 text-primary" />
+              <div>
+                <p className="font-medium">Modo Oscuro</p>
+                <p className="text-xs text-muted-foreground">Activado</p>
+              </div>
             </div>
           </motion.div>
 
@@ -213,7 +221,7 @@ const Settings = () => {
           >
             <div className="flex items-center gap-3 mb-4">
               <HelpCircle className="h-5 w-5 text-primary" />
-              <h3 className="font-display font-semibold text-lg">Ayuda</h3>
+              <h3 className="font-display text-xl tracking-wide">AYUDA</h3>
             </div>
             <div className="space-y-2">
               <button className="w-full p-3 rounded-lg bg-secondary/30 text-left text-sm hover:bg-secondary/50 transition-colors">
@@ -230,7 +238,7 @@ const Settings = () => {
 
           {/* App Version */}
           <div className="text-center text-sm text-muted-foreground">
-            <p>AI Studio Performance v2.1.0</p>
+            <p className="font-display tracking-wide">LARIOS v1.0.0</p>
             <p className="text-xs mt-1">© 2024 Todos los derechos reservados</p>
           </div>
         </div>
