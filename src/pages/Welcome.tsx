@@ -1,46 +1,27 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
 import { Dumbbell, Play } from 'lucide-react';
 
 const Welcome = () => {
   const navigate = useNavigate();
-  const { user, isLoading } = useUser();
   const [videoEnded, setVideoEnded] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
 
+  // Video progress simulation (5 segundos)
   useEffect(() => {
-    // Si el usuario ya completó onboarding, ir directo al dashboard
-    if (!isLoading && user?.hasCompletedOnboarding) {
-      navigate('/dashboard', { replace: true });
-      return;
-    }
-
-    // Si hay progreso guardado en sessionStorage, ir al onboarding
-    const savedProgress = sessionStorage.getItem('larios_onboarding_progress');
-    if (!isLoading && savedProgress && !user?.hasCompletedOnboarding) {
-      navigate('/onboarding', { replace: true });
-      return;
-    }
-  }, [isLoading, user, navigate]);
-
-  // Video progress simulation
-  useEffect(() => {
-    if (!isLoading && !user?.hasCompletedOnboarding) {
-      const interval = setInterval(() => {
-        setVideoProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setVideoEnded(true);
-            return 100;
-          }
-          return prev + 2;
-        });
-      }, 100);
-      return () => clearInterval(interval);
-    }
-  }, [isLoading, user]);
+    const interval = setInterval(() => {
+      setVideoProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setVideoEnded(true);
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   // Navigate after video ends
   useEffect(() => {
@@ -52,14 +33,6 @@ const Welcome = () => {
     }
   }, [videoEnded, navigate]);
 
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="fixed inset-0 bg-background overflow-hidden">
       <AnimatePresence>
@@ -70,9 +43,8 @@ const Welcome = () => {
             exit={{ opacity: 0 }}
             className="absolute inset-0"
           >
-            {/* Video Background Simulation with Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-background via-larios-black to-background">
-              {/* Animated gym elements */}
+              {/* Animated elements */}
               <motion.div
                 animate={{
                   scale: [1, 1.1, 1],

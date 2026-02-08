@@ -17,17 +17,17 @@ import { useEffect } from 'react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const latestStats = weeklyStats[weeklyStats.length - 1];
   const previousStats = weeklyStats[weeklyStats.length - 2];
 
   useEffect(() => {
-    if (!isLoading && (!user || !user.hasCompletedOnboarding)) {
+    if (!user || !user.hasCompletedOnboarding) {
       navigate('/');
     }
-  }, [user, isLoading, navigate]);
+  }, [user, navigate]);
 
-  if (isLoading || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
